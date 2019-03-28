@@ -3,12 +3,12 @@ import sys
 from time import sleep, time
 
 
-def tudo_string(func):
-    def decorador(*args, **kwargs):
+def all_string(func):
+    def decorator(*args, **kwargs):
          args = [str(arg) for arg in args]
          kwargs = {key: str(value) for key, value in kwargs.items()}
          return func(*args, **kwargs)
-    return decorador
+    return decorator
 
 
 def isnt_hex(s):
@@ -20,7 +20,8 @@ def isnt_hex(s):
 
 
 def init(msg_list):
-    # Inicialização
+    data_init = []
+    # Initialization, device data
     for message in msg_list:
         # Send data
         message = b'\x02' + message + b'\x03'
@@ -31,18 +32,18 @@ def init(msg_list):
         data = sock.recv(5000)
         print(sys.stderr, 'received "%s"' % data)
         data_ascii = data.decode()[1:-1]
-        dados.append(data_ascii)
-        # Verificação de erros
-        erros(data)
+        data_init.append(data_ascii)
+        # Error Verification
+        erros(data_ascii)
         sleep(0.05)
 
     return dados
 
 
-def login(senha='F4724744'):
-    if senha.isdigit():
-        senha = str(senha)
-    message = ('sMI 0 03 ' + senha).encode()
+def login(pw='F4724744'):
+    if pw.isdigit():
+        pw = str(pw)
+    message = ('sMI 0 03 ' + pw).encode()
     message = b'\x02' + message + b'\x03'
     print(sys.stderr, 'sending "%s"' % message)
     sock.sendall(message)
@@ -51,7 +52,7 @@ def login(senha='F4724744'):
     data = sock.recv(5000)
     print(sys.stderr, 'received "%s"' % data)
     sleep(0.05)
-    # Verificação de erros
+    # Error Verification
     erros(data)
     if data.decode()[1:-1] == 'sAI 0 1':
         print('Login realizado com sucesso!')
@@ -71,12 +72,12 @@ def run():
     data = sock.recv(5000)
     print(sys.stderr, 'received "%s"' % data)
     sleep(0.05)
-    # Verificação de erros
+    # Error Verification
     erros(data)
     return data
 
 
-@tudo_string
+@all_string
 def conf(antenna_enable, read_power, write_power, priority, minimum_power_apc, power_inc_apc, dwell_t='64', inventory_rounds='2000', reserved='0'):
     # Login
     entrar = login()
@@ -91,7 +92,7 @@ def conf(antenna_enable, read_power, write_power, priority, minimum_power_apc, p
     data = sock.recv(5000)
     print(sys.stderr, 'received "%s"' % data)
     sleep(0.05)
-    # Verificação de erros
+    # Error Verification
     erros(data)
 
     # Sair
@@ -111,7 +112,7 @@ def inventory(n_antena='F'):
     data = sock.recv(5000)
     print(sys.stderr, 'received "%s"' % data)
     sleep(0.05)
-    # Verificação de erros
+    # Error Verification
     erros(data)
     return data
 
@@ -153,7 +154,7 @@ def escrever(dados):
 
     # Word count, retry e dados
     message = message + str(word_count) + ' 32 +' + str(qtd) + ' ' + dados
-    # Enviar
+    # Send
     message = b'\x02' + message.encode() + b'\x03'
     print(sys.stderr, 'sending "%s"' % message)
     sock.sendall(message)
@@ -162,7 +163,7 @@ def escrever(dados):
     data = sock.recv(5000)
     print(sys.stderr, 'received "%s"' % data)
     sleep(0.05)
-    # Verificação de erros
+    # Error Verification
     erros(data)
     return data
 
